@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterPage() {
   const { handleRegister, loading, error } = useAuth();
@@ -11,46 +12,90 @@ export default function RegisterPage() {
     password: "",
   });
 
+  const navigate = useNavigate();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await handleRegister(form);
-    alert("User registered successfully!");
+    const res = await handleRegister(form);
+    if (res?.success) {
+      navigate("/dashboard");
+    }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-2xl shadow-md w-full max-w-md"
-      >
-        <h2 className="text-2xl font-bold mb-4">Register</h2>
+    <>
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+        Crear cuenta
+      </h2>
 
-        {["name", "email", "phone", "address", "password"].map((field) => (
-          <input
-            key={field}
-            type={field === "password" ? "password" : "text"}
-            name={field}
-            placeholder={field}
-            value={(form as any)[field]}
-            onChange={handleChange}
-            className="w-full mb-3 p-2 border rounded"
-          />
-        ))}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          name="name"
+          placeholder="Nombre completo"
+          value={form.name}
+          onChange={handleChange}
+          className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Correo electrónico"
+          value={form.email}
+          onChange={handleChange}
+          className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+          required
+        />
+        <input
+          name="phone"
+          placeholder="Teléfono"
+          value={form.phone}
+          onChange={handleChange}
+          className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+          required
+        />
+        <input
+          name="address"
+          placeholder="Dirección"
+          value={form.address}
+          onChange={handleChange}
+          className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Contraseña"
+          value={form.password}
+          onChange={handleChange}
+          className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+          required
+        />
 
-        {error && <p className="text-red-500 mb-2">{error}</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-3 rounded-xl shadow-md disabled:opacity-50"
         >
-          {loading ? "Registering..." : "Register"}
+          {loading ? "Registrando..." : "Registrarse"}
         </button>
       </form>
-    </div>
+
+      <p className="mt-6 text-center text-gray-600 text-sm">
+        ¿Ya tienes cuenta?{" "}
+        <button
+          onClick={() => navigate("/login")}
+          className="text-blue-600 hover:underline font-medium"
+        >
+          Inicia sesión aquí
+        </button>
+      </p>
+    </>
   );
 }

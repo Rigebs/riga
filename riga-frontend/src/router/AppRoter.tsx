@@ -1,17 +1,47 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+// AppRouter.tsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import ProductsPage from "../pages/ProductsPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
+import CartPage from "../pages/CartPage";
+import OrdersPage from "../pages/OrdersPage";
+import ShopPage from "../pages/ShopPage";
+import MainLayout from "../layouts/MainLayout";
+import CheckoutPage from "../pages/CheckoutPage";
+import OrderSuccessPage from "../pages/OrderSuccessPage";
+import PrivateRoute from "./PrivateRoute";
+import { AuthProvider } from "../context/AuthContext";
+import AuthLayout from "../layouts/AuthLayout";
 
 export default function AppRouter() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<h1>Protected Dashboard</h1>} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Rutas de autenticación */}
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+          </Route>
+
+          {/* Rutas con layout principal */}
+          <Route element={<MainLayout />}>
+            {/* públicas */}
+            <Route path="/" element={<ShopPage />} />
+
+            {/* privadas */}
+            <Route element={<PrivateRoute />}>
+              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/order-success" element={<OrderSuccessPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/dashboard" element={<h1>Protected Dashboard</h1>} />
+            </Route>
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

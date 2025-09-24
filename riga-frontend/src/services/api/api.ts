@@ -1,3 +1,4 @@
+// services/api.ts
 import axios from "axios";
 
 const API_URL = "http://localhost:8080/api";
@@ -43,6 +44,7 @@ api.interceptors.response.use(
         window.location.href = "/login";
       }
     }
+
     return Promise.reject(error);
   }
 );
