@@ -1,6 +1,7 @@
 package com.rige.controllers;
 
 import com.rige.dto.request.CategoryRequest;
+import com.rige.dto.response.ApiResponse;
 import com.rige.dto.response.CategoryResponse;
 import com.rige.services.ICategoryService;
 import lombok.RequiredArgsConstructor;
@@ -17,17 +18,23 @@ public class CategoryController {
     private final ICategoryService categoryService;
 
     @GetMapping
-    public List<CategoryResponse> getAllCategories() {
-        return categoryService.findAll();
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Categories retrieved successfully", categoryService.findAll())
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
-        return ResponseEntity.ok(categoryService.findById(id));
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Category retrieved successfully", categoryService.findById(id))
+        );
     }
 
     @PostMapping
-    public CategoryResponse createCategory(@RequestBody CategoryRequest category) {
-        return categoryService.save(category);
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@RequestBody CategoryRequest category) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Category created successfully", categoryService.save(category))
+        );
     }
 }

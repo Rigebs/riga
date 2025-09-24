@@ -85,6 +85,7 @@ public class ProductServiceImpl implements IProductService {
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
+        dto.setImageUrl(entity.getImageUrl());
         dto.setPrice(entity.getPrice());
         dto.setStock(entity.getStock());
 

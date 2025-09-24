@@ -53,12 +53,7 @@ public class AuthServiceImpl implements IAuthService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        String accessToken = jwtUtils.createAccessToken(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getAuthorities()
-        );
+        String accessToken = jwtUtils.createAccessToken(user);
 
         String refreshToken = jwtUtils.createRefreshToken(
                 user.getEmail()
@@ -74,12 +69,7 @@ public class AuthServiceImpl implements IAuthService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String newAccessToken = jwtUtils.createAccessToken(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getAuthorities()
-        );
+        String newAccessToken = jwtUtils.createAccessToken(user);
 
         return new TokenResponse(newAccessToken, request.getRefreshToken());
     }

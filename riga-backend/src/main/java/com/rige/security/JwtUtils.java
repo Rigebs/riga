@@ -1,5 +1,7 @@
 package com.rige.security;
 
+import com.rige.entities.RoleEntity;
+import com.rige.entities.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -10,10 +12,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtils {
@@ -24,20 +24,21 @@ public class JwtUtils {
     @Value("${jwt.expiration}")
     long jwtExpiration;
 
-    public String createAccessToken(Long id, String username, String email, Collection<? extends GrantedAuthority> roles) {
+    public String createAccessToken(UserEntity user) {
         long expirationTime = jwtExpiration * 1_000;
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
-        List<String> roleNames = new ArrayList<>();
-        for (GrantedAuthority role : roles) {
-            roleNames.add(role.getAuthority());
-        }
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("name", user.getName());
+        claims.put("phone", user.getPhone());
+        claims.put("address", user.getAddress());
+        claims.put("roles", user.getRoles().stream()
+                .map(RoleEntity::getName)
+                .collect(Collectors.toList()));
 
         return Jwts.builder()
-                .claim("id", id)
-                .claim("user", username)
-                .claim("roles", roleNames)
-                .setSubject(email)
+                .setClaims(claims)
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(expirationDate)
                 .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
