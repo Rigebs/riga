@@ -1,18 +1,23 @@
 import { useState } from "react";
-import { login, register, logout } from "../services/authService";
+import { authService } from "../services/authService";
 import type { LoginRequest, UserRequest } from "../types/auth";
+import { useAuth as useAuthContext } from "../context/AuthContext";
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { login: setAuthTokens, logout: clearAuth } = useAuthContext();
 
   const handleRegister = async (data: UserRequest) => {
     try {
       setLoading(true);
       setError(null);
-      return await register(data);
+
+      const res = await authService.register(data);
+      return res;
     } catch (err: any) {
       setError(err.response?.data?.message || "Registration failed");
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -22,15 +27,27 @@ export function useAuth() {
     try {
       setLoading(true);
       setError(null);
-      return await login(data);
+
+      const res = await authService.login(data);
+
+      if (res.success && res.data) {
+        setAuthTokens(res.data.accessToken, res.data.refreshToken);
+        return { success: true };
+      }
+
+      return { success: false };
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed");
+      return { success: false };
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = () => logout();
+  const handleLogout = () => {
+    authService.logout();
+    clearAuth();
+  };
 
   return { handleRegister, handleLogin, handleLogout, loading, error };
 }

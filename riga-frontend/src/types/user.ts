@@ -6,3 +6,8 @@ export interface UserResponse {
   address: string;
   roles: string[];
 }
+
+export interface UpdateUserRequest {
+  address?: string;
+  phone?: string;
+}

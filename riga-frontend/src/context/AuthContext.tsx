@@ -3,7 +3,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 
 interface JwtPayload {
+  id: number;
   name: string;
+  address: string;
+  phone: string;
   roles: string[];
   sub: string;
   exp: number;

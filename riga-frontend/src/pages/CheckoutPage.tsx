@@ -2,18 +2,22 @@ import { useState } from "react";
 import { useCart } from "../hooks/useCart";
 import { useCheckout } from "../hooks/useCheckout";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useUser } from "../hooks/useUser";
+import toast from "react-hot-toast"; // 👈 importar
+import { CheckCircle } from "lucide-react";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
   const { processCheckout, loading, error } = useCheckout();
+  const { user } = useAuth();
+  const { updateUser } = useUser();
 
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    address: "",
-    phone: "",
+    address: user?.address || "",
+    phone: user?.phone || "",
   });
 
   const total = cart.reduce(
@@ -27,12 +31,41 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await processCheckout(form, cart);
+
+    if (!user?.id) {
+      console.error("Usuario no autenticado");
+      return;
+    }
+
+    await processCheckout(user.id, cart);
+
+    if (form.address !== user?.address || form.phone !== user?.phone) {
+      await updateUser(form);
+    }
 
     clearCart();
-    navigate("/order-success", {
-      state: { email: form.email, phone: form.phone },
-    });
+
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } max-w-md w-full bg-white shadow-lg rounded-2xl pointer-events-auto flex ring-opacity-5 p-4`}
+      >
+        <div className="flex items-center">
+          <CheckCircle className="h-6 w-6 text-green-500" />
+          <div className="ml-3">
+            <p className="text-sm font-medium text-gray-900">
+              Pedido realizado con éxito
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              ¡Gracias por tu compra!
+            </p>
+          </div>
+        </div>
+      </div>
+    ));
+
+    navigate("/");
   };
 
   if (cart.length === 0)
@@ -56,23 +89,6 @@ export default function CheckoutPage() {
             Datos de envío
           </h2>
           <div className="grid grid-cols-1 gap-4">
-            <input
-              name="name"
-              placeholder="Nombre completo"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-              required
-            />
-            <input
-              name="email"
-              type="email"
-              placeholder="Correo electrónico"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-              required
-            />
             <input
               name="address"
               placeholder="Dirección"

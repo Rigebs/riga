@@ -1,12 +1,17 @@
 // pages/LoginPage.tsx
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function LoginPage() {
   const { handleLogin, loading, error } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const state = location.state as { from?: Location };
+  const from = state?.from?.pathname || "/dashboard";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,7 +21,7 @@ export default function LoginPage() {
     e.preventDefault();
     const res = await handleLogin(form);
     if (res?.success) {
-      navigate("/dashboard");
+      navigate(from, { replace: true });
     }
   };
 
@@ -25,6 +30,14 @@ export default function LoginPage() {
       <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
         Iniciar sesión
       </h2>
+
+      {/* Mensaje si fue redirigido desde una ruta protegida */}
+      {state?.from && (
+        <p className="mb-4 text-center text-blue-600">
+          Necesitas <strong>iniciar sesión</strong> para continuar con tu
+          pedido.
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
