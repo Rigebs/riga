@@ -29,6 +29,7 @@ public class JwtUtils {
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
         Map<String, Object> claims = new HashMap<>();
+        claims.put("id", user.getId());
         claims.put("name", user.getName());
         claims.put("phone", user.getPhone());
         claims.put("address", user.getAddress());
@@ -46,7 +47,7 @@ public class JwtUtils {
     }
 
     public String createRefreshToken(String email) {
-        long refreshExpiration = jwtExpiration * 7 * 1_000;
+        long refreshExpiration = jwtExpiration * 720 * 1_000;
         Date expirationDate = new Date(System.currentTimeMillis() + refreshExpiration);
 
         return Jwts.builder()

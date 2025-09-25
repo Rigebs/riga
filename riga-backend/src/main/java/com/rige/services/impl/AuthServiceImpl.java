@@ -2,7 +2,7 @@ package com.rige.services.impl;
 
 import com.rige.dto.request.LoginRequest;
 import com.rige.dto.request.RefreshTokenRequest;
-import com.rige.dto.request.TokenResponse;
+import com.rige.dto.response.TokenResponse;
 import com.rige.dto.request.UserRequest;
 import com.rige.entities.RoleEntity;
 import com.rige.entities.UserEntity;

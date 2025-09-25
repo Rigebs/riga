@@ -2,7 +2,7 @@ package com.rige.controllers;
 
 import com.rige.dto.request.LoginRequest;
 import com.rige.dto.request.RefreshTokenRequest;
-import com.rige.dto.request.TokenResponse;
+import com.rige.dto.response.TokenResponse;
 import com.rige.dto.request.UserRequest;
 import com.rige.dto.response.ApiResponse;
 import com.rige.services.IAuthService;

@@ -1,4 +1,4 @@
-package com.rige.dto.request;
+package com.rige.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

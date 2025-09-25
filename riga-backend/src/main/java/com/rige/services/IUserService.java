@@ -1,12 +1,7 @@
 package com.rige.services;
 
-import com.rige.entities.UserEntity;
-
-import java.util.List;
-import java.util.Optional;
+import com.rige.dto.request.UpdateUserRequest;
 
 public interface IUserService {
-    List<UserEntity> findAll();
-    Optional<UserEntity> findById(Long id);
-    UserEntity save(UserEntity user);
+    void update(Long id, UpdateUserRequest request);
 }
