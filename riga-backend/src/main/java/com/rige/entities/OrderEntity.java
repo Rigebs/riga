@@ -20,6 +20,8 @@ public class OrderEntity {
 
     private LocalDateTime orderDate;
 
+    private boolean deliveryRequired;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 

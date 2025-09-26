@@ -3,12 +3,14 @@ package com.rige.controllers;
 import com.rige.dto.request.OrderRequest;
 import com.rige.dto.response.ApiResponse;
 import com.rige.dto.response.OrderResponse;
+import com.rige.filters.OrderFilter;
 import com.rige.services.IOrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -18,9 +20,15 @@ public class OrderController {
     private final IOrderService orderService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> getAllOrders() {
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getAllOrders(
+            @ModelAttribute OrderFilter filter,
+            @PageableDefault Pageable pageable
+            ) {
         return ResponseEntity.ok(
-                new ApiResponse<>(true, "Orders retrieved successfully", orderService.findAll())
+                new ApiResponse<>(true,
+                        "Orders retrieved successfully",
+                        orderService.findAll(filter, pageable)
+                )
         );
     }
 

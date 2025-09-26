@@ -2,11 +2,12 @@ package com.rige.services;
 
 import com.rige.dto.request.OrderRequest;
 import com.rige.dto.response.OrderResponse;
-
-import java.util.List;
+import com.rige.filters.OrderFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface IOrderService {
-    List<OrderResponse> findAll();
+    Page<OrderResponse> findAll(OrderFilter filter, Pageable pageable);
     OrderResponse findById(Long id);
     OrderResponse save(OrderRequest order);
 }

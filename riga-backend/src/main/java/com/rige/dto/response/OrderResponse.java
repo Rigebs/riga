@@ -10,6 +10,7 @@ import java.util.List;
 public class OrderResponse {
     private Long id;
     private LocalDateTime orderDate;
+    private boolean deliveryRequired;
     private OrderStatus status;
     private Double total;
     private UserResponse user;

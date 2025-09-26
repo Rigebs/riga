@@ -4,16 +4,23 @@ import com.rige.dto.request.OrderRequest;
 import com.rige.dto.response.*;
 import com.rige.entities.*;
 import com.rige.enums.OrderStatus;
+import com.rige.filters.OrderFilter;
 import com.rige.repositories.IOrderRepository;
 import com.rige.repositories.IProductRepository;
 import com.rige.repositories.IUserRepository;
 import com.rige.services.IOrderService;
+import com.rige.specifications.OrderSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,11 +32,22 @@ public class OrderServiceImpl implements IOrderService {
     private final IProductRepository productRepository;
 
     @Override
-    public List<OrderResponse> findAll() {
-        return orderRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
+    public Page<OrderResponse> findAll(OrderFilter filter, Pageable pageable) {
+        Page<OrderEntity> page = orderRepository.findAll(OrderSpecification.build(filter), pageable);
+
+        List<OrderEntity> ordersWithItems = orderRepository.findAllById(page.getContent().stream()
+                .map(OrderEntity::getId)
+                .toList());
+
+        Map<Long, OrderEntity> orderMap = ordersWithItems.stream()
+                .collect(Collectors.toMap(OrderEntity::getId, Function.identity()));
+
+        List<OrderResponse> orderedResponses = page.getContent().stream()
+                .map(order -> mapToResponse(orderMap.get(order.getId())))
                 .collect(Collectors.toList());
+
+        // 4️⃣ Devolver como Page
+        return new PageImpl<>(orderedResponses, pageable, page.getTotalElements());
     }
 
     @Override
@@ -64,6 +82,7 @@ public class OrderServiceImpl implements IOrderService {
                 .collect(Collectors.toList());
 
         order.setItems(items);
+        order.setDeliveryRequired(request.isDeliveryRequired());
 
         double total = items.stream()
                 .mapToDouble(i -> i.getUnitPrice() * i.getQuantity())
@@ -79,6 +98,7 @@ public class OrderServiceImpl implements IOrderService {
         OrderResponse dto = new OrderResponse();
         dto.setId(entity.getId());
         dto.setOrderDate(entity.getOrderDate());
+        dto.setDeliveryRequired(entity.isDeliveryRequired());
         dto.setStatus(entity.getStatus());
         dto.setTotal(entity.getTotal());
         dto.setUser(mapUserToResponse(entity.getUser()));
@@ -127,16 +147,6 @@ public class OrderServiceImpl implements IOrderService {
         dto.setDescription(product.getDescription());
         dto.setPrice(product.getPrice());
         dto.setStock(product.getStock());
-        dto.setCategory(mapCategoryToResponse(product.getCategory()));
-        return dto;
-    }
-
-    private CategoryResponse mapCategoryToResponse(CategoryEntity category) {
-        if (category == null) return null;
-        CategoryResponse dto = new CategoryResponse();
-        dto.setId(category.getId());
-        dto.setName(category.getName());
-        dto.setDescription(category.getDescription());
         return dto;
     }
 
