@@ -1,5 +1,5 @@
 // context/AuthContext.tsx
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 
 interface JwtPayload {
@@ -23,22 +23,26 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<JwtPayload | null>(null);
+  // 👇 Estado inicial directamente desde localStorage
+  const storedToken = localStorage.getItem("accessToken");
+  let initialUser: JwtPayload | null = null;
+  let initialAuth = false;
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      try {
-        const decoded = jwtDecode<JwtPayload>(token);
-        setUser(decoded);
-        setIsAuthenticated(true);
-      } catch {
-        setUser(null);
-        setIsAuthenticated(false);
+  if (storedToken) {
+    try {
+      const decoded = jwtDecode<JwtPayload>(storedToken);
+      // opcional: chequear expiración
+      if (decoded.exp * 1000 > Date.now()) {
+        initialUser = decoded;
+        initialAuth = true;
       }
+    } catch {
+      // token inválido → se queda en null
     }
-  }, []);
+  }
+
+  const [isAuthenticated, setIsAuthenticated] = useState(initialAuth);
+  const [user, setUser] = useState<JwtPayload | null>(initialUser);
 
   const login = (accessToken: string, refreshToken: string) => {
     localStorage.setItem("accessToken", accessToken);
@@ -47,18 +51,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const decoded = jwtDecode<JwtPayload>(accessToken);
       setUser(decoded);
+      setIsAuthenticated(true);
     } catch {
       setUser(null);
+      setIsAuthenticated(false);
     }
-
-    setIsAuthenticated(true);
   };
 
   const logout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
-    setIsAuthenticated(false);
     setUser(null);
+    setIsAuthenticated(false);
   };
 
   return (

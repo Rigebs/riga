@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ShoppingCart, Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 interface Props {
@@ -18,6 +18,25 @@ const Navbar: React.FC<Props> = ({ cartLength = 0, onCartClick }) => {
     navigate("/login");
   };
 
+  // 🔹 Definimos rutas según rol
+  const clientRoutes = [
+    { path: "/", label: "Inicio" },
+    { path: "/orders", label: "Mis pedidos" },
+  ];
+
+  const adminRoutes = [
+    { path: "/", label: "Dashboard" },
+    { path: "/products", label: "Productos" },
+    { path: "/orders", label: "Pedidos" },
+    { path: "/users", label: "Usuarios" },
+  ];
+
+  // 🔹 Lógica: si es admin → adminRoutes, si no → clientRoutes
+  const routes =
+    isAuthenticated && user?.roles?.includes("ROLE_ADMIN")
+      ? adminRoutes
+      : clientRoutes;
+
   return (
     <nav className="w-full bg-white shadow-md fixed top-0 left-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -28,33 +47,19 @@ const Navbar: React.FC<Props> = ({ cartLength = 0, onCartClick }) => {
 
         {/* Desktop links */}
         <ul className="hidden md:flex items-center gap-6">
-          <li>
-            <Link
-              to="/"
-              className="text-gray-700 hover:text-gray-900 transition"
-            >
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/shop"
-              className="text-gray-700 hover:text-gray-900 transition"
-            >
-              Shop
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/about"
-              className="text-gray-700 hover:text-gray-900 transition"
-            >
-              About
-            </Link>
-          </li>
+          {routes.map((r) => (
+            <li key={r.path}>
+              <Link
+                to={r.path}
+                className="text-gray-700 hover:text-gray-900 transition"
+              >
+                {r.label}
+              </Link>
+            </li>
+          ))}
         </ul>
 
-        {/* Right actions (always visible) */}
+        {/* Right actions */}
         <div className="flex items-center gap-4">
           {isAuthenticated && user && (
             <span className="hidden sm:inline text-gray-700 font-medium">
@@ -62,7 +67,8 @@ const Navbar: React.FC<Props> = ({ cartLength = 0, onCartClick }) => {
             </span>
           )}
 
-          {cartLength > 0 && onCartClick && (
+          {/* Carrito SOLO para clientes */}
+          {user?.roles?.includes("client") && cartLength > 0 && onCartClick && (
             <button
               className="relative text-gray-700 hover:text-gray-900 transition"
               onClick={onCartClick}
@@ -93,39 +99,22 @@ const Navbar: React.FC<Props> = ({ cartLength = 0, onCartClick }) => {
         </div>
       </div>
 
-      {/* Mobile dropdown (only links) */}
+      {/* Mobile dropdown */}
       {menuOpen && (
         <div className="md:hidden bg-white border-t shadow-md">
           <ul className="flex flex-col p-4 gap-4">
-            <li>
-              <Link
-                to="/"
-                onClick={() => setMenuOpen(false)}
-                className="text-gray-700 hover:text-gray-900"
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/shop"
-                onClick={() => setMenuOpen(false)}
-                className="text-gray-700 hover:text-gray-900"
-              >
-                Shop
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/about"
-                onClick={() => setMenuOpen(false)}
-                className="text-gray-700 hover:text-gray-900"
-              >
-                About
-              </Link>
-            </li>
+            {routes.map((r) => (
+              <li key={r.path}>
+                <Link
+                  to={r.path}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  {r.label}
+                </Link>
+              </li>
+            ))}
 
-            {/* Opcional: en mobile podrías poner logout aquí también */}
             {isAuthenticated && (
               <button
                 onClick={() => {

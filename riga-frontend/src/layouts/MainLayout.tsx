@@ -14,7 +14,7 @@ const MainLayout: React.FC<Props> = ({ cartLength = 0, onCartClick }) => {
       <Navbar cartLength={cartLength} onCartClick={onCartClick} />
 
       {/* Page Content */}
-      <main className="pt-20 px-6 max-w-7xl mx-auto">
+      <main className="pt-20 pb-6 px-6 max-w-7xl mx-auto">
         <Outlet /> {/* 👈 aquí se inyectan las páginas */}
       </main>
     </div>

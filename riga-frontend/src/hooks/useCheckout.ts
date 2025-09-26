@@ -9,7 +9,11 @@ export function useCheckout() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  async function processCheckout(userId: number, cart: CartItem[]) {
+  async function processCheckout(
+    userId: number,
+    cart: CartItem[],
+    deliveryRequired: boolean
+  ) {
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -21,6 +25,7 @@ export function useCheckout() {
           productId: c.product.id,
           quantity: c.quantity,
         })),
+        deliveryRequired: deliveryRequired,
       };
 
       const response = await orderService.create(orderRequest);

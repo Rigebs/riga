@@ -36,5 +36,15 @@ export function useCart() {
 
   const clearCart = () => setCart([]);
 
-  return { cart, addToCart, removeFromCart, clearCart };
+  // ✅ NUEVO: actualizar cantidad
+  const updateQuantity = (productId: number, quantity: number) => {
+    if (quantity < 1) return; // evitar que baje de 1
+    setCart((prev) =>
+      prev.map((item) =>
+        item.product.id === productId ? { ...item, quantity } : item
+      )
+    );
+  };
+
+  return { cart, addToCart, removeFromCart, clearCart, updateQuantity };
 }

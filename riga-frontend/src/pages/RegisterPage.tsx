@@ -22,7 +22,7 @@ export default function RegisterPage() {
     e.preventDefault();
     const res = await handleRegister(form);
     if (res?.success) {
-      navigate("/dashboard");
+      navigate("/");
     }
   };
 

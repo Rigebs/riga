@@ -1,10 +1,24 @@
 import type { ApiResponse } from "../types/api-response";
-import type { OrderRequest, OrderResponse } from "../types/order";
+import type { OrderFilter, OrderRequest, OrderResponse } from "../types/order";
+import type { Page } from "../types/page";
 import api from "./api/api";
 
 export const orderService = {
-  getAll: async (): Promise<ApiResponse<OrderResponse[]>> => {
-    const { data } = await api.get<ApiResponse<OrderResponse[]>>("/orders");
+  getAll: async (
+    filter?: Partial<OrderFilter>,
+    page: number = 0,
+    size: number = 5
+  ): Promise<ApiResponse<Page<OrderResponse>>> => {
+    const { data } = await api.get<ApiResponse<Page<OrderResponse>>>(
+      "/orders",
+      {
+        params: {
+          ...filter,
+          page,
+          size,
+        },
+      }
+    );
     return data;
   },
 

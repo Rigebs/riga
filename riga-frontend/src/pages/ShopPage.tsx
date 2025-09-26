@@ -19,7 +19,9 @@ export default function ShopPage() {
     loading: categoriesLoading,
     error: categoriesError,
   } = useCategory();
-  const { addToCart, cart, removeFromCart, clearCart } = useCart();
+
+  const { addToCart, cart, removeFromCart, clearCart, updateQuantity } =
+    useCart();
 
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [isCartOpen, setCartOpen] = useState(false);
@@ -47,7 +49,7 @@ export default function ShopPage() {
         <p>No products found</p>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredProducts.map((product) => (
           <ProductCard
             key={product.id}
@@ -63,6 +65,7 @@ export default function ShopPage() {
         onClose={() => setCartOpen(false)}
         removeFromCart={removeFromCart}
         clearCart={clearCart}
+        updateQuantity={updateQuantity} // <-- aquí lo pasamos
         onCheckout={() => {
           setCartOpen(false);
           navigate("/checkout");

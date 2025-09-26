@@ -11,7 +11,7 @@ export default function LoginPage() {
   const location = useLocation();
 
   const state = location.state as { from?: Location };
-  const from = state?.from?.pathname || "/dashboard";
+  const from = state?.from?.pathname || "/";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });

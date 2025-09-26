@@ -1,5 +1,6 @@
 import { Trash, X } from "lucide-react";
 import React from "react";
+import { QuantitySelector } from "./QuantitySelector";
 
 interface Product {
   id: number;
@@ -19,6 +20,7 @@ interface Props {
   removeFromCart: (id: number) => void;
   clearCart: () => void;
   onCheckout: () => void;
+  updateQuantity: (id: number, quantity: number) => void;
 }
 
 const CartDrawer: React.FC<Props> = ({
@@ -28,6 +30,7 @@ const CartDrawer: React.FC<Props> = ({
   removeFromCart,
   clearCart,
   onCheckout,
+  updateQuantity,
 }) => {
   const total = cart.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
@@ -72,27 +75,47 @@ const CartDrawer: React.FC<Props> = ({
             <p className="p-6 text-gray-500 italic">Your cart is empty</p>
           ) : (
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {cart.map((item) => (
-                <div
-                  key={item.product.id}
-                  className="flex justify-between items-center p-3 bg-white/80 backdrop-blur-sm rounded-md shadow-sm"
-                >
-                  <div>
-                    <p className="font-semibold text-gray-800">
-                      {item.product.name}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      ${item.product.price.toFixed(2)} x {item.quantity}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => removeFromCart(item.product.id)}
-                    className="text-red-500 hover:text-red-700 p-1 rounded transition"
+              {cart.map((item) => {
+                const subtotal = item.product.price * item.quantity;
+                return (
+                  <div
+                    key={item.product.id}
+                    className="flex justify-between items-center p-3 bg-white/80 backdrop-blur-sm rounded-md shadow-sm"
                   >
-                    <Trash size={20} />
-                  </button>
-                </div>
-              ))}
+                    {/* Información del producto */}
+                    <div>
+                      <p className="font-semibold text-gray-800">
+                        {item.product.name}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        s/. {item.product.price.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Subtotal: ${subtotal.toFixed(2)}
+                      </p>
+                    </div>
+
+                    {/* Selector de cantidad y botón eliminar */}
+                    <div className="flex items-center gap-3">
+                      <QuantitySelector
+                        quantity={item.quantity}
+                        onIncrease={() =>
+                          updateQuantity(item.product.id, item.quantity + 1)
+                        }
+                        onDecrease={() =>
+                          updateQuantity(item.product.id, item.quantity - 1)
+                        }
+                      />
+                      <button
+                        onClick={() => removeFromCart(item.product.id)}
+                        className="text-red-500 hover:text-red-700 p-1 rounded transition"
+                      >
+                        <Trash size={20} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
