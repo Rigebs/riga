@@ -12,6 +12,8 @@ public class OrderResponse {
     private LocalDateTime orderDate;
     private boolean deliveryRequired;
     private OrderStatus status;
+    private boolean modified;
+    private boolean customerConfirmed;
     private Double total;
     private UserResponse user;
     private List<OrderItemResponse> items;

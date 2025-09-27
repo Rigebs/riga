@@ -25,9 +25,12 @@ public class OrderEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    private boolean modified;
+    private boolean customerConfirmed;
+
     private Double total;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 

@@ -1,8 +1,10 @@
 package com.rige.services.impl;
 
+import com.rige.dto.request.OrderItemRequest;
 import com.rige.dto.request.OrderRequest;
 import com.rige.dto.response.*;
 import com.rige.entities.*;
+import com.rige.enums.OrderItemStatus;
 import com.rige.enums.OrderStatus;
 import com.rige.filters.OrderFilter;
 import com.rige.repositories.IOrderRepository;
@@ -15,8 +17,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +50,6 @@ public class OrderServiceImpl implements IOrderService {
                 .map(order -> mapToResponse(orderMap.get(order.getId())))
                 .collect(Collectors.toList());
 
-        // 4️⃣ Devolver como Page
         return new PageImpl<>(orderedResponses, pageable, page.getTotalElements());
     }
 
@@ -94,12 +97,102 @@ public class OrderServiceImpl implements IOrderService {
         return mapToResponse(saved);
     }
 
+    @Override
+    @Transactional
+    public OrderResponse confirmOrder(Long id) {
+        OrderEntity order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Only pending orders can be confirmed");
+        }
+
+        order.setStatus(OrderStatus.PROCESSING);
+        OrderEntity updated = orderRepository.save(order);
+
+        return mapToResponse(updated);
+    }
+
+    @Override
+    public OrderResponse customerConfirmOrder(Long id) {
+        OrderEntity order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        order.setCustomerConfirmed(true);
+        orderRepository.save(order);
+        return mapToResponse(order);
+    }
+
+    @Override
+    public OrderResponse updateOrder(Long id, OrderRequest orderRequest) {
+        OrderEntity order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        Map<Long, OrderItemRequest> requestMap = orderRequest.getItems().stream()
+                .collect(Collectors.toMap(OrderItemRequest::getProductId, i -> i));
+
+        List<OrderItemEntity> updatedItems = new ArrayList<>();
+
+        for (OrderItemEntity existingItem : order.getItems()) {
+            OrderItemRequest reqItem = requestMap.get(existingItem.getProduct().getId());
+
+            if (reqItem == null || (reqItem.getQuantity() != null && reqItem.getQuantity() <= 0)) {
+                // REMOVED
+                existingItem.setStatus(OrderItemStatus.REMOVED);
+            } else if (reqItem.getNewQuantity() != null && !existingItem.getQuantity().equals(reqItem.getNewQuantity())) {
+                // UPDATED
+                if (existingItem.getOriginalQuantity() == null) {
+                    existingItem.setOriginalQuantity(existingItem.getQuantity());
+                }
+                existingItem.setQuantity(reqItem.getNewQuantity());
+                existingItem.setStatus(OrderItemStatus.UPDATED);
+            } else {
+                // sin cambios
+                existingItem.setStatus(OrderItemStatus.ACTIVE);
+            }
+
+            updatedItems.add(existingItem);
+        }
+
+        for (OrderItemRequest reqItem : orderRequest.getItems()) {
+            boolean exists = order.getItems().stream()
+                    .anyMatch(i -> i.getProduct().getId().equals(reqItem.getProductId()));
+            if (!exists && reqItem.getQuantity() != null && reqItem.getQuantity() > 0) {
+                ProductEntity product = productRepository.findById(reqItem.getProductId())
+                        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+                OrderItemEntity newItem = new OrderItemEntity();
+                newItem.setOrder(order);
+                newItem.setProduct(product);
+                newItem.setQuantity(reqItem.getQuantity());
+                newItem.setOriginalQuantity(reqItem.getQuantity());
+                newItem.setStatus(OrderItemStatus.ACTIVE);
+                updatedItems.add(newItem);
+            }
+        }
+
+        order.setItems(updatedItems);
+        order.setModified(true);
+
+        double total = updatedItems.stream()
+                .filter(i -> i.getStatus() == OrderItemStatus.ACTIVE || i.getStatus() == OrderItemStatus.UPDATED)
+                .mapToDouble(i -> i.getProduct().getPrice() * i.getQuantity())
+                .sum();
+
+        order.setTotal(total);
+
+        orderRepository.save(order);
+
+        return mapToResponse(order);
+    }
+
     private OrderResponse mapToResponse(OrderEntity entity) {
         OrderResponse dto = new OrderResponse();
         dto.setId(entity.getId());
         dto.setOrderDate(entity.getOrderDate());
         dto.setDeliveryRequired(entity.isDeliveryRequired());
         dto.setStatus(entity.getStatus());
+        dto.setModified(entity.isModified());
+        dto.setCustomerConfirmed(entity.isCustomerConfirmed());
         dto.setTotal(entity.getTotal());
         dto.setUser(mapUserToResponse(entity.getUser()));
 
@@ -154,6 +247,8 @@ public class OrderServiceImpl implements IOrderService {
         OrderItemResponse dto = new OrderItemResponse();
         dto.setId(item.getId());
         dto.setQuantity(item.getQuantity());
+        dto.setOriginalQuantity(item.getOriginalQuantity());
+        dto.setStatus(item.getStatus());
         dto.setUnitPrice(item.getUnitPrice());
         dto.setProduct(mapProductToResponse(item.getProduct()));
         return dto;

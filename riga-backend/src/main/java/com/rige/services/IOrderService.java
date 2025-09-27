@@ -10,4 +10,7 @@ public interface IOrderService {
     Page<OrderResponse> findAll(OrderFilter filter, Pageable pageable);
     OrderResponse findById(Long id);
     OrderResponse save(OrderRequest order);
+    OrderResponse confirmOrder(Long id);
+    OrderResponse updateOrder(Long id, OrderRequest orderRequest);
+    OrderResponse customerConfirmOrder(Long id);
 }

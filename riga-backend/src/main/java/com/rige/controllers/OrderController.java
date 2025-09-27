@@ -45,4 +45,31 @@ public class OrderController {
                 new ApiResponse<>(true, "Order created successfully", orderService.save(order))
         );
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<OrderResponse>> updateOrder(
+            @PathVariable Long id,
+            @RequestBody OrderRequest orderRequest
+    ) {
+        OrderResponse updatedOrder = orderService.updateOrder(id, orderRequest);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Order updated successfully", updatedOrder)
+        );
+    }
+
+    @PatchMapping("/{id}/confirm")
+    public ResponseEntity<ApiResponse<OrderResponse>> confirmOrder(@PathVariable Long id) {
+        OrderResponse confirmedOrder = orderService.confirmOrder(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Order confirmed successfully", confirmedOrder)
+        );
+    }
+
+    @PatchMapping("/{id}/customer-confirm")
+    public ResponseEntity<ApiResponse<OrderResponse>> customerConfirmOrder(@PathVariable Long id) {
+        OrderResponse confirmedOrder = orderService.customerConfirmOrder(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Order confirmed by customer", confirmedOrder)
+        );
+    }
 }

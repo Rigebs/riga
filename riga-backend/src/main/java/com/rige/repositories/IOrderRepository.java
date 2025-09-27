@@ -17,9 +17,6 @@ public interface IOrderRepository extends JpaRepository<OrderEntity, Long>, JpaS
 
     @Override
     @NonNull
-    @EntityGraph(attributePaths = {
-            "user.roles"
-    })
     Page<OrderEntity> findAll(Specification<OrderEntity> spec, @NonNull Pageable pageable);
 
     @Override

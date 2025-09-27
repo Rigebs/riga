@@ -1,5 +1,6 @@
 package com.rige.entities;
 
+import com.rige.enums.OrderItemStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +16,11 @@ public class OrderItemEntity {
     private Long id;
 
     private Integer quantity;
+    private Integer originalQuantity;
     private Double unitPrice;
+
+    @Enumerated(EnumType.STRING)
+    private OrderItemStatus status;
 
     @ManyToOne
     @JoinColumn(name = "order_id")
