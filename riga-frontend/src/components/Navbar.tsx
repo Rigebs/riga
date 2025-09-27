@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -11,11 +11,9 @@ interface Props {
 const Navbar: React.FC<Props> = ({ cartLength = 0, onCartClick }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
   };
 
   // 🔹 Definimos rutas según rol

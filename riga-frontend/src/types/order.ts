@@ -3,10 +3,14 @@ import type { UserResponse } from "./user";
 
 export type OrderStatus = "PENDING" | "PROCESSING" | "DELIVERED" | "CANCELED";
 
+export type OrderItemStatus = "ACTIVE" | "REMOVED" | "UPDATED";
+
 export interface OrderItemResponse {
   id: number;
   product: ProductResponse;
   quantity: number;
+  originalQuantity: number;
+  status: OrderItemStatus;
   unitPrice: number;
 }
 
@@ -15,6 +19,8 @@ export interface OrderResponse {
   orderDate: string;
   deliveryRequired: boolean;
   status: OrderStatus;
+  modified: boolean;
+  customerConfirmed: boolean;
   total: number;
   user: UserResponse;
   items: OrderItemResponse[];
@@ -23,6 +29,8 @@ export interface OrderResponse {
 export interface OrderItemRequest {
   productId: number;
   quantity: number;
+  newQuantity?: number;
+  unavailable?: boolean;
 }
 
 export interface OrderRequest {

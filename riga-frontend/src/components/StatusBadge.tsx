@@ -9,10 +9,10 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     "px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1";
 
   switch (status) {
-    case "COMPLETED":
+    case "PROCESSING":
       return (
         <span className={`${base} bg-green-100 text-green-700`}>
-          <CheckCircle className="h-4 w-4" /> Completado
+          <CheckCircle className="h-4 w-4" /> En proceso
         </span>
       );
     case "PENDING":

@@ -5,13 +5,22 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 export default function LoginPage() {
   const { handleLogin, loading, error } = useAuth();
-  const [form, setForm] = useState({ email: "", password: "" });
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const state = location.state as { from?: Location };
-  const from = state?.from?.pathname || "/";
+  const state = location.state as {
+    from?: Location | string;
+    registered?: boolean;
+    email?: string;
+  };
+
+  const to = state?.from ?? "/";
+
+  const [form, setForm] = useState({
+    email: state?.email || "",
+    password: "",
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,23 +28,31 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const res = await handleLogin(form);
     if (res?.success) {
-      navigate(from, { replace: true });
+      navigate(to, { replace: true });
     }
   };
 
   return (
     <>
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-        Iniciar sesión
-      </h2>
+      <div className="flex flex-col items-center mb-6">
+        <img src="/logo.svg" alt="Logo" className="w-16 h-16 mb-2" />
+        <h2 className="text-3xl font-bold text-gray-800">Iniciar sesión</h2>
+      </div>
 
       {/* Mensaje si fue redirigido desde una ruta protegida */}
       {state?.from && (
         <p className="mb-4 text-center text-blue-600">
           Necesitas <strong>iniciar sesión</strong> para continuar con tu
           pedido.
+        </p>
+      )}
+
+      {state?.registered && (
+        <p className="mb-4 text-center text-green-600">
+          Cuenta creada con éxito ✅ Ahora puedes iniciar sesión.
         </p>
       )}
 
@@ -73,7 +90,11 @@ export default function LoginPage() {
       <p className="mt-6 text-center text-gray-600 text-sm">
         ¿No tienes cuenta?{" "}
         <button
-          onClick={() => navigate("/register")}
+          onClick={() =>
+            navigate("/register", {
+              state: { from: state?.from },
+            })
+          }
           className="text-blue-600 hover:underline font-medium"
         >
           Regístrate aquí

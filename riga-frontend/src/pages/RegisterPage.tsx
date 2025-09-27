@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function RegisterPage() {
   const { handleRegister, loading, error } = useAuth();
@@ -18,11 +18,22 @@ export default function RegisterPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const location = useLocation();
+
+  const state = location.state as { from?: Location };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = await handleRegister(form);
     if (res?.success) {
-      navigate("/");
+      navigate("/login", {
+        state: {
+          registered: true,
+          email: form.email,
+          from: state?.from,
+        },
+      });
+      console.log(state.from);
     }
   };
 

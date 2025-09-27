@@ -7,7 +7,8 @@ export const orderService = {
   getAll: async (
     filter?: Partial<OrderFilter>,
     page: number = 0,
-    size: number = 5
+    size: number = 5,
+    sort?: string[]
   ): Promise<ApiResponse<Page<OrderResponse>>> => {
     const { data } = await api.get<ApiResponse<Page<OrderResponse>>>(
       "/orders",
@@ -16,6 +17,7 @@ export const orderService = {
           ...filter,
           page,
           size,
+          sort,
         },
       }
     );
@@ -33,6 +35,33 @@ export const orderService = {
     const { data } = await api.post<ApiResponse<OrderResponse>>(
       "/orders",
       order
+    );
+    return data;
+  },
+
+  update: async (
+    id: number,
+    order: Partial<OrderRequest>
+  ): Promise<ApiResponse<OrderResponse>> => {
+    const { data } = await api.put<ApiResponse<OrderResponse>>(
+      `/orders/${id}`,
+      order
+    );
+    return data;
+  },
+
+  confirm: async (id: number): Promise<ApiResponse<OrderResponse>> => {
+    const { data } = await api.patch<ApiResponse<OrderResponse>>(
+      `/orders/${id}/confirm`
+    );
+    return data;
+  },
+
+  customerConfirmOrder: async (
+    id: number
+  ): Promise<ApiResponse<OrderResponse>> => {
+    const { data } = await api.patch<ApiResponse<OrderResponse>>(
+      `/orders/${id}/customer-confirm`
     );
     return data;
   },
