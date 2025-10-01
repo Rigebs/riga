@@ -4,6 +4,7 @@ import com.rige.entities.ProductEntity;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,4 +16,7 @@ public interface IProductRepository extends JpaRepository<ProductEntity, Long> {
     @NonNull
     @EntityGraph(attributePaths = {"category"})
     List<ProductEntity> findAll();
+
+    @Query("SELECT SUM(p.stock) FROM ProductEntity p")
+    Long sumStock();
 }

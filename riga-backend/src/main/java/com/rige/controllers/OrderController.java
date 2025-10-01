@@ -72,4 +72,20 @@ public class OrderController {
                 new ApiResponse<>(true, "Order confirmed by customer", confirmedOrder)
         );
     }
+
+    @PatchMapping("/{id}/deliver")
+    public ResponseEntity<ApiResponse<OrderResponse>> deliverOrder(@PathVariable Long id) {
+        OrderResponse deliveredOrder = orderService.deliverOrder(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Order marked as delivered", deliveredOrder)
+        );
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(@PathVariable Long id) {
+        OrderResponse canceledOrder = orderService.cancelOrder(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Order canceled successfully", canceledOrder)
+        );
+    }
 }

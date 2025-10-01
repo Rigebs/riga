@@ -28,6 +28,9 @@ public class OrderEntity {
     private boolean modified;
     private boolean customerConfirmed;
 
+    @Column(name = "delivered_at")
+    private LocalDateTime deliveredAt;
+
     private Double total;
 
     @ManyToOne(fetch = FetchType.LAZY)

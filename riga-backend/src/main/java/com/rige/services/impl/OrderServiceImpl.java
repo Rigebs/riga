@@ -6,6 +6,7 @@ import com.rige.dto.response.*;
 import com.rige.entities.*;
 import com.rige.enums.OrderItemStatus;
 import com.rige.enums.OrderStatus;
+import com.rige.exceptions.ResourceNotFoundException;
 import com.rige.filters.OrderFilter;
 import com.rige.repositories.IOrderRepository;
 import com.rige.repositories.IProductRepository;
@@ -16,8 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -180,6 +183,36 @@ public class OrderServiceImpl implements IOrderService {
 
         order.setTotal(total);
 
+        orderRepository.save(order);
+
+        return mapToResponse(order);
+    }
+
+    @Override
+    public OrderResponse deliverOrder(Long orderId) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (!order.getStatus().equals(OrderStatus.PROCESSING)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only orders in PROCESSING state can be delivered");
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        order.setDeliveredAt(LocalDateTime.now());
+        orderRepository.save(order);
+
+        return mapToResponse(order);
+    }
+
+    public OrderResponse cancelOrder(Long id) {
+        OrderEntity order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PENDING or PROCESSING orders can be canceled");
+        }
+
+        order.setStatus(OrderStatus.CANCELED);
         orderRepository.save(order);
 
         return mapToResponse(order);

@@ -13,4 +13,6 @@ public interface IOrderService {
     OrderResponse confirmOrder(Long id);
     OrderResponse updateOrder(Long id, OrderRequest orderRequest);
     OrderResponse customerConfirmOrder(Long id);
+    OrderResponse deliverOrder(Long orderId);
+    OrderResponse cancelOrder(Long orderId);
 }
