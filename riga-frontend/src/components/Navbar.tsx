@@ -16,20 +16,18 @@ const Navbar: React.FC<Props> = ({ cartLength = 0, onCartClick }) => {
     logout();
   };
 
-  // 🔹 Definimos rutas según rol
   const clientRoutes = [
     { path: "/", label: "Inicio" },
     { path: "/orders", label: "Mis pedidos" },
   ];
 
   const adminRoutes = [
-    { path: "/", label: "Dashboard" },
+    { path: "/dashboard", label: "Dashboard" },
     { path: "/products", label: "Productos" },
     { path: "/orders", label: "Pedidos" },
     { path: "/users", label: "Usuarios" },
   ];
 
-  // 🔹 Lógica: si es admin → adminRoutes, si no → clientRoutes
   const routes =
     isAuthenticated && user?.roles?.includes("ROLE_ADMIN")
       ? adminRoutes

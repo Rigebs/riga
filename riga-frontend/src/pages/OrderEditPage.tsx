@@ -160,55 +160,61 @@ export default function OrderEditPage() {
                   key={item.product.id}
                   className="border border-gray-400 rounded-xl p-3 space-y-2"
                 >
-                  <div className="flex justify-between items-center gap-3">
-                    <span
-                      className={`font-medium flex-1 ${
-                        isRemoved
-                          ? "text-red-500 line-through"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {item.product.name}
-                    </span>
-
-                    {isUpdated && (
-                      <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-xl font-medium">
-                        Actualizado
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    {/* Nombre + badge */}
+                    <div className="flex items-center gap-2 flex-1">
+                      <span
+                        className={`font-medium ${
+                          isRemoved
+                            ? "text-red-500 line-through"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {item.product.name}
                       </span>
-                    )}
 
-                    {!isRemoved && (
-                      <QuantitySelector
-                        quantity={displayQuantity}
-                        max={item.originalQuantity ?? item.quantity}
-                        onIncrease={() =>
-                          handleItemQuantity(
-                            index,
-                            Math.min(
-                              item.originalQuantity ?? item.quantity,
-                              displayQuantity + 1
+                      {isUpdated && (
+                        <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-xl font-medium whitespace-nowrap">
+                          Actualizado
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Selector + checkbox */}
+                    <div className="flex items-center gap-3">
+                      {!isRemoved && (
+                        <QuantitySelector
+                          quantity={displayQuantity}
+                          max={item.originalQuantity ?? item.quantity}
+                          onIncrease={() =>
+                            handleItemQuantity(
+                              index,
+                              Math.min(
+                                item.originalQuantity ?? item.quantity,
+                                displayQuantity + 1
+                              )
                             )
-                          )
-                        }
-                        onDecrease={() =>
-                          handleItemQuantity(
-                            index,
-                            Math.max(1, displayQuantity - 1)
-                          )
-                        }
-                      />
-                    )}
+                          }
+                          onDecrease={() =>
+                            handleItemQuantity(
+                              index,
+                              Math.max(1, displayQuantity - 1)
+                            )
+                          }
+                        />
+                      )}
 
-                    <label className="flex items-center gap-2 text-sm text-red-600 whitespace-nowrap">
-                      <input
-                        type="checkbox"
-                        checked={isRemoved}
-                        onChange={(e) =>
-                          handleUnavailableToggle(index, e.target.checked)
-                        }
-                      />
-                      Sin stock
-                    </label>
+                      <label className="flex items-center gap-2 text-sm text-red-600 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={isRemoved}
+                          onChange={(e) =>
+                            handleUnavailableToggle(index, e.target.checked)
+                          }
+                        />
+                        Sin stock
+                      </label>
+                    </div>
                   </div>
 
                   {isRemoved && (

@@ -1,6 +1,6 @@
 // context/AuthContext.tsx
-import { createContext, useContext, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface JwtPayload {
   id: number;
@@ -23,38 +23,42 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // 👇 Estado inicial directamente desde localStorage
-  const storedToken = localStorage.getItem("accessToken");
-  let initialUser: JwtPayload | null = null;
-  let initialAuth = false;
-
-  if (storedToken) {
+  const [user, setUser] = useState<JwtPayload | null>(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return null;
     try {
-      const decoded = jwtDecode<JwtPayload>(storedToken);
-      // opcional: chequear expiración
-      if (decoded.exp * 1000 > Date.now()) {
-        initialUser = decoded;
-        initialAuth = true;
-      }
+      const decoded = jwtDecode<JwtPayload>(token);
+      return decoded.exp * 1000 > Date.now() ? decoded : null;
     } catch {
-      // token inválido → se queda en null
+      return null;
     }
-  }
+  });
 
-  const [isAuthenticated, setIsAuthenticated] = useState(initialAuth);
-  const [user, setUser] = useState<JwtPayload | null>(initialUser);
+  const isAuthenticated = !!user;
+
+  useEffect(() => {
+    const handleTokenRefreshed = (e: any) => {
+      try {
+        const decoded = jwtDecode<JwtPayload>(e.detail);
+        setUser(decoded);
+      } catch {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener("tokenRefreshed", handleTokenRefreshed);
+    return () =>
+      window.removeEventListener("tokenRefreshed", handleTokenRefreshed);
+  }, []);
 
   const login = (accessToken: string, refreshToken: string) => {
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
-
     try {
       const decoded = jwtDecode<JwtPayload>(accessToken);
       setUser(decoded);
-      setIsAuthenticated(true);
     } catch {
       setUser(null);
-      setIsAuthenticated(false);
     }
   };
 
@@ -62,7 +66,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     setUser(null);
-    setIsAuthenticated(false);
   };
 
   return (

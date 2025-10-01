@@ -1,4 +1,4 @@
-import { CheckCircle, Clock, XCircle } from "lucide-react";
+import { CheckCircle, Clock, PackageCheck, XCircle } from "lucide-react";
 
 interface StatusBadgeProps {
   status: string;
@@ -11,7 +11,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   switch (status) {
     case "PROCESSING":
       return (
-        <span className={`${base} bg-green-100 text-green-700`}>
+        <span className={`${base} bg-blue-100 text-blue-700`}>
           <CheckCircle className="h-4 w-4" /> En proceso
         </span>
       );
@@ -19,6 +19,12 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       return (
         <span className={`${base} bg-yellow-100 text-yellow-700`}>
           <Clock className="h-4 w-4" /> Pendiente
+        </span>
+      );
+    case "DELIVERED":
+      return (
+        <span className={`${base} bg-green-100 text-green-700`}>
+          <PackageCheck className="h-4 w-4" /> Entregado
         </span>
       );
     case "CANCELED":

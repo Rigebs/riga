@@ -42,24 +42,50 @@ export default function OrdersPage() {
     return filter;
   }, [user?.id, user?.roles, statusFilter]);
 
-  const { orders, loading, error, page, totalPages, goToPage, confirmOrder } =
-    useOrders({
-      initialFilter: apiFilter,
-      initialSort: ["orderDate,desc"],
-    });
+  const {
+    orders,
+    loading,
+    confirming,
+    delivering,
+    canceling,
+    error,
+    page,
+    totalPages,
+    goToPage,
+    confirmOrder,
+    deliverOrder,
+    cancelOrder,
+  } = useOrders({
+    initialFilter: apiFilter,
+    initialSort: ["orderDate,desc"],
+  });
 
-  const [confirming, setConfirming] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const handleConfirm = async (orderId: number) => {
     try {
-      setConfirming(orderId);
       await confirmOrder(orderId);
-      toast.success("Pedido confirmado correctamente ✅");
+      toast.success("Pedido confirmado correctamente");
     } catch (err) {
-      toast.error("No se pudo confirmar el pedido ❌");
-    } finally {
-      setConfirming(null);
+      toast.error("No se pudo confirmar el pedido");
+    }
+  };
+
+  const handleDeliver = async (orderId: number) => {
+    try {
+      await deliverOrder(orderId);
+      toast.success("Pedido entregado correctamente");
+    } catch (err) {
+      toast.error("No se pudo entregar el pedido");
+    }
+  };
+
+  const handleCancel = async (orderId: number) => {
+    try {
+      await cancelOrder(orderId);
+      toast.success("Pedido cancelado correctamente");
+    } catch (err) {
+      toast.error("No se pudo cancelar el pedido");
     }
   };
 
@@ -138,7 +164,11 @@ export default function OrdersPage() {
               onConfirm={handleConfirm}
               onEdit={handleEdit}
               onView={handleView}
+              onDeliver={handleDeliver}
+              onCancel={handleCancel}
               confirming={confirming === order.id}
+              delivering={delivering === order.id}
+              canceling={canceling === order.id}
             />
           ))}
         </div>

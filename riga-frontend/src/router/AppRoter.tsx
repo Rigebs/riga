@@ -15,6 +15,7 @@ import { AuthProvider } from "../context/AuthContext";
 import AuthLayout from "../layouts/AuthLayout";
 import OrderEditPage from "../pages/OrderEditPage";
 import OrderViewPage from "../pages/OrderViewPage";
+import DashboardPage from "../pages/DashboardPage";
 
 export default function AppRouter() {
   return (
@@ -41,7 +42,7 @@ export default function AppRouter() {
               <Route path="/orders/:id/edit" element={<OrderEditPage />} />
               <Route path="/orders/:id/view" element={<OrderViewPage />} />
               <Route path="/orders" element={<OrdersPage />} />
-              <Route path="/dashboard" element={<h1>Protected Dashboard</h1>} />
+              <Route path="/dashboard" element={<DashboardPage />} />
             </Route>
           </Route>
         </Routes>

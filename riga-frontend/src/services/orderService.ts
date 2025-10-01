@@ -65,4 +65,18 @@ export const orderService = {
     );
     return data;
   },
+
+  deliverOrder: async (id: number): Promise<ApiResponse<OrderResponse>> => {
+    const { data } = await api.patch<ApiResponse<OrderResponse>>(
+      `/orders/${id}/deliver`
+    );
+    return data;
+  },
+
+  cancelOrder: async (id: number): Promise<ApiResponse<OrderResponse>> => {
+    const { data } = await api.patch<ApiResponse<OrderResponse>>(
+      `/orders/${id}/cancel`
+    );
+    return data;
+  },
 };

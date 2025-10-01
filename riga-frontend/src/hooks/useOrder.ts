@@ -20,6 +20,11 @@ export function useOrders({
   const [totalPages, setTotalPages] = useState(1);
   const [sort, setSort] = useState<string[]>(initialSort ?? []);
 
+  // Loading individuales por acción
+  const [confirming, setConfirming] = useState<number | null>(null);
+  const [delivering, setDelivering] = useState<number | null>(null);
+  const [canceling, setCanceling] = useState<number | null>(null);
+
   const PAGE_SIZE = 5;
 
   const fetchOrders = async (
@@ -43,7 +48,7 @@ export function useOrders({
       } else {
         setError(res.message);
       }
-    } catch (err) {
+    } catch {
       setError("Error fetching orders");
     } finally {
       setLoading(false);
@@ -51,9 +56,7 @@ export function useOrders({
   };
 
   useEffect(() => {
-    if (autoFetch) {
-      fetchOrders(0, initialFilter, sort);
-    }
+    if (autoFetch) fetchOrders(0, initialFilter, sort);
   }, [initialFilter, sort, autoFetch]);
 
   const goToPage = (pageNumber: number) => {
@@ -63,20 +66,44 @@ export function useOrders({
   };
 
   const confirmOrder = async (id: number) => {
-    const res = await orderService.confirm(id);
-    if (res.success) {
+    setConfirming(id);
+    try {
+      const res = await orderService.confirm(id);
+      if (!res.success) throw new Error(res.message);
       await fetchOrders(page, initialFilter, sort);
-    } else {
-      throw new Error(res.message);
+      return res;
+    } finally {
+      setConfirming(null);
     }
-    return res;
+  };
+
+  const deliverOrder = async (id: number) => {
+    setDelivering(id);
+    try {
+      const res = await orderService.deliverOrder(id);
+      if (!res.success) throw new Error(res.message);
+      await fetchOrders(page, initialFilter, sort);
+      return res;
+    } finally {
+      setDelivering(null);
+    }
+  };
+
+  const cancelOrder = async (id: number) => {
+    setCanceling(id);
+    try {
+      const res = await orderService.cancelOrder(id);
+      if (!res.success) throw new Error(res.message);
+      await fetchOrders(page, initialFilter, sort);
+      return res;
+    } finally {
+      setCanceling(null);
+    }
   };
 
   const updateOrder = async (id: number, order: Partial<OrderRequest>) => {
     const res = await orderService.update(id, order);
-    if (!res.success) {
-      throw new Error(res.message);
-    }
+    if (!res.success) throw new Error(res.message);
   };
 
   return {
@@ -90,6 +117,11 @@ export function useOrders({
     refresh: () => fetchOrders(page, initialFilter, sort),
     goToPage,
     confirmOrder,
-    updateOrder, // <-- agregado
+    deliverOrder,
+    cancelOrder,
+    updateOrder,
+    confirming,
+    delivering,
+    canceling,
   };
 }
